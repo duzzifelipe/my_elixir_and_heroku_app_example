@@ -1,0 +1,67 @@
+name: Elixir
+on:
+  push:
+    branches: "**"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: elixir:1.9.4
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: my_app_test
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432/tcp
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup deps caching
+      id: deps_cache
+      uses: actions/cache@v1
+      with:
+        path: deps
+        key: ${{ runner.os }}-deps-${{ hashFiles('**/mix.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-deps-
+    - name: Setup _build caching
+      id: build_cache
+      uses: actions/cache@v1
+      with:
+        path: _build
+        key: ${{ runner.os }}-build-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+    - name: Install Dependencies
+      run: |
+        mix local.rebar --force
+        mix local.hex --force
+        mix deps.get
+        mix deps.compile
+      env:
+        MIX_ENV: test
+    - name: Run Dialyzer Analysis
+      run: mix dialyzer --format short
+    - name: Check code Format
+      run: mix format --check-formatted --dry-run
+    - name: Run code Analysis
+      run: mix credo --strict
+    - name: Setup Database
+      run: |
+        mix ecto.create
+        mix ecto.migrate
+      env:
+        MIX_ENV: test
+        DATABASE_HOSTNAME: postgres
+    - name: Run tests with coverage
+      run: mix test --cover --raise
+      env:
+        MIX_ENV: test
+        DATABASE_HOSTNAME: postgres
+    - name: Save coverage report
+      uses: actions/upload-artifact@v2
+      with:
+        name: test_coverage_report
+        path: cover/

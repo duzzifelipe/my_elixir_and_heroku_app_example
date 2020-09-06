@@ -5,12 +5,23 @@ defmodule MyApp.MixProject do
     [
       app: :my_app,
       version: "0.1.0",
-      elixir: "~> 1.7",
+      elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_add_apps: [
+          :ex_unit,
+          :mix,
+          :erts,
+          :phoenix_pubsub,
+          :ecto,
+          :telemetry
+        ],
+        list_unused_filters: true
+      ]
     ]
   end
 
@@ -44,7 +55,9 @@ defmodule MyApp.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:credo, "~> 1.4.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0.0", runtime: false, allow_pre: false, only: [:dev, :test]}
     ]
   end
 
