@@ -77,3 +77,7 @@ jobs:
         heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
         heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
         usedocker: true
+    - name: Run Migrations
+      run: heroku run bash '/app/bin/migrate' --app ${{ secrets.HEROKU_APP_NAME }} --type=worker
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
