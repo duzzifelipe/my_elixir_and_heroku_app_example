@@ -55,7 +55,6 @@ RUN cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
 
 # IMPORTANT: Replace "my_app" with your application's name
 COPY --from=build /app/src/_build/prod/rel/my_app /app/.
-COPY rel/bin/ /app/bin/
 
 ENV MIX_ENV=${MIX_ENV}
 
